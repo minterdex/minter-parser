@@ -23,3 +23,4 @@ docker/data/
 config/test.json
 config/development.json
 .env
+db

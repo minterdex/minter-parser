@@ -1,3 +1,13 @@
 {
-    "MINTER_NODE": "http://127.0.0.1:26657"
+    "MONGO": {
+        "URI": "mongodb://localhost:27017/minter"
+    },
+    "MINTER_NODE": "http://localhost:8841",
+    "PARSER": {
+        "DELAYS": {
+            "FORWARD": "",
+            "BACKWARD": ""
+        },
+        "MAX_CONCURRENT_BLOCKS": "1"
+    }
 }

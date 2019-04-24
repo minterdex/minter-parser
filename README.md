@@ -1,6 +1,6 @@
 # Minter Blockchain Parser
 
-Minter Blockchain Parser in Node.js + RethinkDB
+Minter Blockchain Parser in Node.js + MongoDB
 
 ## Features
 

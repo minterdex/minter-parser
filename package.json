@@ -1,7 +1,7 @@
 {
   "name": "minter-parser",
   "description": "Parser for Minter Blockchain",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "author": "Angelo Recca",
   "scripts": {
     "start": "cross-env NODE_ENV=development npm run watch-ts && npm run tslint",
@@ -32,6 +32,8 @@
     "express-session": "^1.16.1",
     "express-validator": "^5.3.1",
     "fs": "0.0.1-security",
+    "mongoose": "^5.5.3",
+    "mongoose-paginate": "^5.0.3",
     "morgan": "^1.9.1",
     "ts-node": "^8.1.0",
     "tsc-watch": "^2.1.2",
