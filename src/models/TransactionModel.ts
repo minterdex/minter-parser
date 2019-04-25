@@ -13,8 +13,9 @@ const transactionSchema = new Schema({
         type: String,
         required: true
     },
-    blockNumber: {
+    block_number: {
         type: Number,
+        ref: "BlockModel",
         required: true,
         index: true
     },

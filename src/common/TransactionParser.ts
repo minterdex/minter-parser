@@ -4,9 +4,11 @@ import { ITransaction, IBlock, IExtractedTransaction } from "./CommonInterfaces"
 
 import { Config } from "./Config";
 import * as Bluebird from "bluebird";
+import { Block } from "../models/BlockModel";
 
 export class TransactionParser {
     public parseTransactions(blocks: any) {
+        console.log(blocks)
         if (blocks.length === 0) return Promise.resolve();
 
         const extractedTransactions = blocks.flatMap((block: any) => {
@@ -18,8 +20,14 @@ export class TransactionParser {
         const bulkTransactions = Transaction.collection.initializeUnorderedBulkOp();
 
         extractedTransactions.forEach((transaction: IExtractedTransaction) => {
-            bulkTransactions.find({_id: transaction._id}).upsert().replaceOne(transaction)
+            Transaction.findOneAndUpdate({_id: transaction._id}, transaction, {upsert: true, new: true})
+            .then((transaction: any) => {
+                return Block.findOneAndUpdate({_id: transaction.block_number}, {$push: {transactions: transaction._id}})
+            })
+            //bulkTransactions.find({_id: transaction._id}).upsert().replaceOne(transaction)
         })
+
+        return Promise.resolve(extractedTransactions);
 
         if (bulkTransactions.length === 0) return Promise.resolve();
 
@@ -35,7 +43,7 @@ export class TransactionParser {
 
         return {
             _id: String(transaction.hash),
-            //blockNumber: Number(transaction.blockNumber),
+            block_number: Number(block.height),
             timeStamp: String(block.time),
             nonce: Number(transaction.nonce),
             from,

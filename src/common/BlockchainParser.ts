@@ -2,6 +2,7 @@ import * as winston from "winston";
 import { BlockchainState } from "./BlockchainState";
 import { LastParsedBlock } from "../models/LastParsedBlockModel";
 import { TransactionParser } from "./TransactionParser";
+import { BlockParser } from "./BlockParser";
 import { Minter } from "../services/Minter"
 import { Config } from "./Config";
 import { setDelay } from "./Utils";
@@ -10,6 +11,7 @@ const config = require("config");
 
 export class BlockchainParser {
 
+    private blockParser: BlockParser;
     private transactionParser: TransactionParser;
     private maxConcurrentBlocks: number = parseInt(config.get("PARSER.MAX_CONCURRENT_BLOCKS")) || 2;
     private rebalanceOffsets: number[] = [15];
@@ -17,6 +19,7 @@ export class BlockchainParser {
     private backwardParsedDelay: number = parseInt(config.get("PARSER.DELAYS.BACKWARD")) || 300;
 
     constructor() {
+        this.blockParser = new BlockParser();
         this.transactionParser = new TransactionParser();
     }
 
@@ -144,36 +147,21 @@ export class BlockchainParser {
         });
 
         return Promise.all(promises).then((blocks: any) => {
+            const hasNullBlocks = blocks.filter((block: any) => block === null);
+
+            if (hasNullBlocks.length > 0) {
+                return Promise.reject("Has null blocks. Wait for RPC to build a block");
+            }
+
+            this.blockParser.parseBlocks(blocks);
+
+            return blocks;
+        }).then((blocks: any) => {
             return this.transactionParser.parseTransactions(this.flatBlocksWithMissingTransactions(blocks));
         }).then(() => {
             const endBlock = ascending ? numberBlocks[numberBlocks.length - 1] : numberBlocks[0];
             return endBlock ? Promise.resolve(endBlock) : Promise.reject(endBlock);
         });
-        /*return Promise.all(promises).then((blocks: any) => {
-            const hasNullBlocks = blocks.filter((block: any) => block === null);
-            if (hasNullBlocks.length > 0) {
-                return Promise.reject("Has null blocks. Wait for RPC to build a block");
-            }
-            return this.transactionParser.parseTransactions(this.flatBlocksWithMissingTransactions(blocks));
-        }).then(() => {
-            const endBlock = ascending ? numberBlocks[numberBlocks.length - 1] : numberBlocks[0];
-            return endBlock ? Promise.resolve(endBlock) : Promise.reject(endBlock);
-        });*/
-        
-        /*return Promise.all(promises).then((blocks) => {
-            const hasNullBlocks = blocks.filter((block: any) => block === null);
-            if (hasNullBlocks.length > 0) {
-                return Promise.reject("Has null blocks. Wait for RPC to build a block");
-            }
-            return this.transactionParser.parseTransactions(this.flatBlocksWithMissingTransactions(blocks));
-        }).then((transactions: any) => {
-            //return this.tokenParser.parseERC20Contracts(transactions);
-        }).then(([transactions, contracts]: any) => {
-            //return this.transactionParser.parseTransactionOperations(transactions, contracts);
-        }).then(() => {
-            const endBlock = ascending ? numberBlocks[numberBlocks.length - 1] : numberBlocks[0];
-            return endBlock ? Promise.resolve(endBlock) : Promise.reject(endBlock);
-        });*/
     }
 
     private saveLastParsedBlock(block: number) {

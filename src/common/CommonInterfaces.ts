@@ -1,16 +1,11 @@
 export interface ITransaction {
+    block_number: Number,
     from: string,
     gas: number,
     gasPrice: string,
     hash: string,
-    //input: string,
     nonce: number,
     to: string,
-    //transactionIndex: number,
-    //value: string,
-    //v?: string,
-    //r?: string,
-    //s?: string,
 }
 
 export interface IExtractedTransaction extends ITransaction {
@@ -18,8 +13,17 @@ export interface IExtractedTransaction extends ITransaction {
 }
 
 export interface IBlock {
-    gasLimit: number,
-    gasUsed: number,
-    hash: string,
-    time: string,
+    height: Number
+    hash: String,
+    time: Date,
+    num_txs: Number,
+    total_txs: Number,
+    block_reward: Number,
+    size: Number,
+    proposer: String,
+    validators: any
+}
+
+export interface IExtractedBlock extends IBlock {
+    _id: string,
 }
