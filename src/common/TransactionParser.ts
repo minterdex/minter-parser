@@ -22,11 +22,6 @@ export class TransactionParser {
         extractedTransactions.forEach((transaction: IExtractedTransaction) => {
             Transaction.findOneAndUpdate({_id: transaction._id}, transaction, {upsert: true, new: true})
             .then((transaction: any) => {
-                if (transaction.tags && transaction.tags["tx.type"] === "05") {
-                    const coin = this.extractCoinData(transaction.data, transaction);
-                    this.findOrCreateCoin(coin);
-                }
-
                 return transaction;
             }).then((transaction: any) => {
                 return Block.findOneAndUpdate({height: transaction.block_number}, {$push: {transactions: transaction._id}})
@@ -41,22 +36,6 @@ export class TransactionParser {
         return bulkTransactions.execute().then((bulkResult: any) => {
             return Promise.resolve(extractedTransactions);
         });
-    }
-
-    private findOrCreateCoin = async (coin: ICoin) => {
-
-        try {
-            const update = await Coin.findOneAndUpdate(
-                {symbol: coin.symbol}, 
-                coin,
-                {upsert: true, new: true}
-            )
-
-            return update
-        } catch (error) {
-            winston.error(`Error updating Coin`, error)
-            return Promise.reject(error)
-        }
     }
 
     extractCoinData(coin: ICoin, tx: ITransaction) {

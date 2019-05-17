@@ -3,6 +3,7 @@ import { BlockchainState } from "./BlockchainState";
 import { LastParsedBlock } from "../models/LastParsedBlockModel";
 import { TransactionParser } from "./TransactionParser";
 import { BlockParser } from "./BlockParser";
+import { CoinParser } from "./CoinParser";
 import { Minter } from "../services/Minter"
 import { Config } from "./Config";
 import { setDelay } from "./Utils";
@@ -13,12 +14,14 @@ export class BlockchainParser {
 
     private blockParser: BlockParser;
     private transactionParser: TransactionParser;
+    private coinParser: CoinParser;
     private maxConcurrentBlocks: number = parseInt(config.get("PARSER.MAX_CONCURRENT_BLOCKS")) || 2;
     private forwardParsedDelay: number = parseInt(config.get("PARSER.DELAYS.FORWARD")) || 100;
 
     constructor() {
         this.blockParser = new BlockParser();
         this.transactionParser = new TransactionParser();
+        this.coinParser = new CoinParser();
     }
 
     public start() {
@@ -98,6 +101,8 @@ export class BlockchainParser {
             return blocks;
         }).then((blocks: any) => {
             return this.transactionParser.parseTransactions(this.flatBlocksWithMissingTransactions(blocks));
+        }).then((transactions: any) => {
+            return this.coinParser.parseCoins(transactions);
         }).then(() => {
             const endBlock = ascending ? numberBlocks[numberBlocks.length - 1] : numberBlocks[0];
             return endBlock ? Promise.resolve(endBlock) : Promise.reject(endBlock);
