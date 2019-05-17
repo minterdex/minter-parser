@@ -9,9 +9,19 @@ const Schema = mongoose.Schema;
  * @type {"mongoose".Schema}
  */
 const transactionSchema = new Schema({
-    _id: {
+    hash: {
+        type: String,
+        required: true,
+        index: true
+    },
+    raw_tx: {
         type: String,
         required: true
+    },
+    type: {
+        type: Number,
+        required: true,
+        index: true
     },
     block_number: {
         type: Number,
@@ -30,35 +40,33 @@ const transactionSchema = new Schema({
     },
     from: {
         type: String,
-        required: true
-    },
-    to: {
-        type: String,
-        required: true
-    },
-    addresses: [{
-        type: String,
+        required: true,
         index: true
-    }],
-    value: {
-        type: String,
-        required: true
+    },
+    tags: {
+        type: Object
+    },
+    data: {
+        type: Object
     },
     gas: {
         type: String,
         required: true
     },
-    gasPrice: {
+    gas_price: {
         type: String,
         required: true
     },
-    gasUsed: {
+    gas_coin: {
         type: String,
         required: true
     },
-    error: {
-        type: String
-    }
+    payload: {
+        type: String,
+    },
+    service_data: {
+        type: String,
+    },
     /*operations: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "TransactionOperation"

@@ -7,31 +7,12 @@ export class BlockchainState {
             if (!blockInDb) {
                 return new LastParsedBlock({
                     lastBlock: blockInChain,
-                    lastBackwardBlock: blockInChain,
-                    lastPusherBlock: blockInChain,
-                    lastTokensBlock: blockInChain,
-                    lastTokensBackwardBlock: blockInChain
+                    lastParsedBlock: 0
                 }).save()
             }
 
-            if (!blockInDb.lastBlock) {
+            if (blockInDb.lastBlock < blockInChain) {
                 blockInDb.lastBlock = blockInChain
-            }
-
-            if (!blockInDb.lastBackwardBlock) {
-                blockInDb.lastBackwardBlock = blockInChain
-            }
-
-            if (!blockInDb.lastPusherBlock) {
-                blockInDb.lastPusherBlock = blockInChain
-            }
-
-            if (!blockInDb.lastTokensBlock) {
-                blockInDb.lastTokensBlock = blockInChain
-            }
-
-            if (!blockInDb.lastTokensBackwardBlock) {
-                blockInDb.lastTokensBackwardBlock = blockInChain
             }
 
             return blockInDb.save()

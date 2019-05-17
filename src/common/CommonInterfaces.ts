@@ -1,11 +1,17 @@
 export interface ITransaction {
     block_number: Number,
     from: string,
+    tags: Object,
     gas: number,
-    gasPrice: string,
+    gas_price: string,
+    gas_coin: string,
     hash: string,
     nonce: number,
     to: string,
+    data: Object,
+    raw_tx: string,
+    payload: string,
+    service_data: string
 }
 
 export interface IExtractedTransaction extends ITransaction {

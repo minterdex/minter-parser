@@ -8,7 +8,7 @@ import { Block } from "../models/BlockModel";
 
 export class TransactionParser {
     public parseTransactions(blocks: any) {
-        console.log(blocks)
+        //console.log(blocks)
         if (blocks.length === 0) return Promise.resolve();
 
         const extractedTransactions = blocks.flatMap((block: any) => {
@@ -37,23 +37,25 @@ export class TransactionParser {
     }
 
     extractTransactionData(block: IBlock, transaction: ITransaction) {
-        const from = String(transaction.from).toLowerCase();
-        const to: string = transaction.to === null ? "" : String(transaction.to).toLowerCase();
-        const addresses: string[] = to ? [from, to] : [from];
+        //const from = String(transaction.from).toLowerCase();
+        //console.log(transaction)
+        //const to: string = transaction.to === null ? "" : String(transaction.to).toLowerCase();
+        //const addresses: string[] = to ? [from, to] : [from];
 
         return {
-            _id: String(transaction.hash),
+            hash: String(transaction.hash),
+            raw_tx: String(transaction.raw_tx),
+            data: transaction.data,
             block_number: Number(block.height),
             timeStamp: String(block.time),
             nonce: Number(transaction.nonce),
-            from,
-            to,
-            //value: String(transaction.value),
+            from: transaction.from,
+            tags: transaction.tags,
             gas: String(transaction.gas),
-            gasPrice: String(transaction.gasPrice),
-            gasUsed: String(0),
-            //input: String(transaction.input),
-            addresses
+            gasPrice: String(transaction.gas_price),
+            gasCoin: String(transaction.gas_coin),
+            payload: String(transaction.payload),
+            service_data: String(transaction.service_data)
         };
     }
 }
