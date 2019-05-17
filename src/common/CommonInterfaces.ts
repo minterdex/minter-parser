@@ -11,7 +11,8 @@ export interface ITransaction {
     data: Object,
     raw_tx: string,
     payload: string,
-    service_data: string
+    service_data: string,
+    timeStamp: string
 }
 
 export interface IExtractedTransaction extends ITransaction {
@@ -32,4 +33,18 @@ export interface IBlock {
 
 export interface IExtractedBlock extends IBlock {
     _id: string,
+}
+
+export interface ICoin {
+    name: string,
+    symbol: string,
+    owner: string,
+    height: number,
+    initial_amount: string,
+    initial_reserve: string,
+    constant_reserve_ratio: string
+}
+
+export interface IExtractedCoin extends ICoin {
+    _id: string
 }

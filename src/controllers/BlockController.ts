@@ -1,16 +1,16 @@
 import { Request, Response } from "express";
 import { sendJSONresponse } from "../common/Utils";
-import { Transaction } from "../models/TransactionModel";
+import { Block } from "../models/BlockModel";
 import * as xss from "xss-filters";
 
-export class TransactionController {
+export class BlockController {
 
     private defaultLimit: number = 25;
     private maxLimit: number = 50;
 
-    public readAllTransactions = (req: Request, res: Response) => {
+    public readAllBlocks = (req: Request, res: Response) => {
         // validate query input
-        const validationErrors: any = TransactionController.validateQueryParameters(req);
+        const validationErrors: any = BlockController.validateQueryParameters(req);
         if (validationErrors) {
             sendJSONresponse(res, 400, validationErrors);
             return;
@@ -21,17 +21,17 @@ export class TransactionController {
         
         // build up query
         const query: any = {};
-        /*if (queryParams.address !== undefined) {
-            const address: string = queryParams.address.toLowerCase();
-            query.addresses = { "$in": [address] };
-        }*/
-        query.block_number = { "$gte": queryParams.startBlock, "$lte": queryParams.endBlock};
-        const address: string = queryParams.address.toLowerCase();
+        
+        query.height = { "$gte": queryParams.startBlock, "$lte": queryParams.endBlock};
 
-        Transaction.paginate(query, {
+        Block.paginate(query, {
             page: queryParams.page,
             limit: queryParams.limit,
-            sort: {timeStamp: -1}
+            sort: {timeStamp: -1},
+            populate: {
+                path: "transactions",
+                model: "Transaction"
+            }
         }).then((transactions: any) => {
             sendJSONresponse(res, 200, transactions);
         }).catch((err: Error) => {
@@ -40,47 +40,11 @@ export class TransactionController {
 
     }
 
-    public readOneTransaction(req: Request, res: Response) {
-        if (!req.params || !req.params.transactionId) {
-            sendJSONresponse(res, 404, { "message": "No transaction ID in request" });
-            return;
-        }
-
-        // validate transaction ID
-        req.checkParams("transactionId", "Transaction ID must be alphanumeric").isAlphanumeric();
-        const validationErrors = req.validationErrors();
-        if (validationErrors) {
-            sendJSONresponse(res, 400, validationErrors);
-            return;
-        }
-
-        const transactionId = xss.inHTMLData(req.params.transactionId);
-
-        Transaction.findOne({
-            _id: transactionId
-        }).populate({
-            path: "operations",
-            populate: {
-                path: "contract",
-                model: "ERC20Contract"
-            }
-        }).exec().then((transaction: any) => {
-            if (!transaction) {
-                sendJSONresponse(res, 404, {"message": "transaction ID not found"});
-                return;
-            }
-            sendJSONresponse(res, 200, transaction);
-        }).catch((err: Error) => {
-            sendJSONresponse(res, 404, err);
-        });
-    }
-
     private static validateQueryParameters(req: Request) {
         req.checkQuery("page", "Page needs to be a number").optional().isNumeric();
         req.checkQuery("startBlock", "startBlock needs to be a number").optional().isNumeric();
         req.checkQuery("endBlock", "endBlock needs to be a number").optional().isNumeric();
         req.checkQuery("limit", "limit needs to be a number").optional().isNumeric();
-        //req.checkQuery("address", "address needs to be alphanumeric and have a length 42").isAlphanumeric().isLength({ min: 42, max: 42 });
 
         return req.validationErrors();
     }
@@ -102,9 +66,6 @@ export class TransactionController {
             limit = 1;
         }
 
-        // address parameter
-        const address = xss.inHTMLData(req.query.address).toLowerCase();
-
         // start block parameter
         let startBlock = parseInt(xss.inHTMLData(req.query.startBlock));
         if (isNaN(startBlock) || startBlock < 1) {
@@ -118,7 +79,6 @@ export class TransactionController {
         }
 
         return {
-            address: address,
             startBlock: startBlock,
             endBlock: endBlock,
             page: page,

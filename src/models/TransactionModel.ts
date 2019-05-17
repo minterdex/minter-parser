@@ -25,7 +25,7 @@ const transactionSchema = new Schema({
     },
     block_number: {
         type: Number,
-        ref: "BlockModel",
+        ref: "Block",
         required: true,
         index: true
     },
@@ -67,15 +67,6 @@ const transactionSchema = new Schema({
     service_data: {
         type: String,
     },
-    /*operations: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "TransactionOperation"
-    }],
-    contract: {
-        type: String,
-        default: null
-    }*/
-
 }, {
     versionKey: false,
     toObject: {

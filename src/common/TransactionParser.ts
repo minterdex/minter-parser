@@ -1,14 +1,14 @@
 import * as winston from "winston";
 import { Transaction } from "../models/TransactionModel";
-import { ITransaction, IBlock, IExtractedTransaction } from "./CommonInterfaces";
+import { ITransaction, IBlock, IExtractedTransaction, ICoin, IExtractedCoin } from "./CommonInterfaces";
 
 import { Config } from "./Config";
 import * as Bluebird from "bluebird";
 import { Block } from "../models/BlockModel";
+import { Coin } from "../models/CoinModel";
 
 export class TransactionParser {
     public parseTransactions(blocks: any) {
-        //console.log(blocks)
         if (blocks.length === 0) return Promise.resolve();
 
         const extractedTransactions = blocks.flatMap((block: any) => {
@@ -22,7 +22,14 @@ export class TransactionParser {
         extractedTransactions.forEach((transaction: IExtractedTransaction) => {
             Transaction.findOneAndUpdate({_id: transaction._id}, transaction, {upsert: true, new: true})
             .then((transaction: any) => {
-                return Block.findOneAndUpdate({_id: transaction.block_number}, {$push: {transactions: transaction._id}})
+                if (transaction.tags && transaction.tags["tx.type"] === "05") {
+                    const coin = this.extractCoinData(transaction.data, transaction);
+                    this.findOrCreateCoin(coin);
+                }
+
+                return transaction;
+            }).then((transaction: any) => {
+                return Block.findOneAndUpdate({height: transaction.block_number}, {$push: {transactions: transaction._id}})
             })
             //bulkTransactions.find({_id: transaction._id}).upsert().replaceOne(transaction)
         })
@@ -34,6 +41,35 @@ export class TransactionParser {
         return bulkTransactions.execute().then((bulkResult: any) => {
             return Promise.resolve(extractedTransactions);
         });
+    }
+
+    private findOrCreateCoin = async (coin: ICoin) => {
+
+        try {
+            const update = await Coin.findOneAndUpdate(
+                {symbol: coin.symbol}, 
+                coin,
+                {upsert: true, new: true}
+            )
+
+            return update
+        } catch (error) {
+            winston.error(`Error updating Coin`, error)
+            return Promise.reject(error)
+        }
+    }
+
+    extractCoinData(coin: ICoin, tx: ITransaction) {
+        return {
+            name: String(coin.name),
+            symbol: String(coin.symbol),
+            owner: String(tx.from),
+            height: Number(tx.block_number),
+            initial_amount: String(coin.initial_amount),
+            initial_reserve: String(coin.initial_reserve),
+            constant_reserve_ratio: String(coin.constant_reserve_ratio),
+            timeStamp: String(tx.timeStamp),
+        }
     }
 
     extractTransactionData(block: IBlock, transaction: ITransaction) {

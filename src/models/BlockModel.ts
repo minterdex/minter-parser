@@ -12,6 +12,10 @@ const blockSchema = new Schema({
         type: Number,
         required: true
     },
+    height: {
+        type: Number,
+        required: true
+    },
     hash: {
         type: String,
         required: true,
@@ -27,9 +31,9 @@ const blockSchema = new Schema({
         type: Number,
     },
     transactions: [{
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Transactions",
-        trim: true,
+        required: true,
         index: true
     }],
     block_reward: {

@@ -16,7 +16,7 @@ export class BlockParser {
         const bulkBlocks = Block.collection.initializeUnorderedBulkOp();
 
         extractedBlocks.forEach((block: IExtractedBlock) => {
-            bulkBlocks.find({_id: block._id}).upsert().replaceOne(block)
+            bulkBlocks.find({height: block.height}).upsert().replaceOne(block)
         })
 
         if (bulkBlocks.length === 0) return Promise.resolve();
@@ -29,6 +29,7 @@ export class BlockParser {
     extractBlockData(block: IBlock) {
         return {
             _id: Number(block.height),
+            height: Number(block.height),
             hash: String(block.hash),
             time: block.time,
             num_txs: Number(block.num_txs),
