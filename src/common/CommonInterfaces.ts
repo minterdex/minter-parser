@@ -48,3 +48,20 @@ export interface ICoin {
 export interface IExtractedCoin extends ICoin {
     _id: string
 }
+
+export interface IBalance {
+    symbol: string,
+    amount: string
+}
+
+export interface IAccount {
+    address: string,
+    height: number,
+    /*balance: [
+        IBalance
+    ]*/
+}
+
+export interface IExtractedAccount extends IAccount {
+    _id: string
+}

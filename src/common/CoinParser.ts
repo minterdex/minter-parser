@@ -23,7 +23,7 @@ export class CoinParser {
         if (bulkCoins.length === 0) return Promise.resolve();
 
         return bulkCoins.execute().then((bulkResult: any) => {
-            return Promise.resolve(extractedCoins);
+            return Promise.resolve(transactions);
         });
     }
 

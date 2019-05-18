@@ -4,6 +4,7 @@ import { LastParsedBlock } from "../models/LastParsedBlockModel";
 import { TransactionParser } from "./TransactionParser";
 import { BlockParser } from "./BlockParser";
 import { CoinParser } from "./CoinParser";
+import { AccountParser } from "./AccountParser";
 import { Minter } from "../services/Minter"
 import { Config } from "./Config";
 import { setDelay } from "./Utils";
@@ -15,6 +16,7 @@ export class BlockchainParser {
     private blockParser: BlockParser;
     private transactionParser: TransactionParser;
     private coinParser: CoinParser;
+    private accountParser: AccountParser;
     private maxConcurrentBlocks: number = parseInt(config.get("PARSER.MAX_CONCURRENT_BLOCKS")) || 2;
     private forwardParsedDelay: number = parseInt(config.get("PARSER.DELAYS.FORWARD")) || 100;
 
@@ -22,6 +24,7 @@ export class BlockchainParser {
         this.blockParser = new BlockParser();
         this.transactionParser = new TransactionParser();
         this.coinParser = new CoinParser();
+        this.accountParser = new AccountParser();
     }
 
     public start() {
@@ -101,6 +104,8 @@ export class BlockchainParser {
             return blocks;
         }).then((blocks: any) => {
             return this.transactionParser.parseTransactions(this.flatBlocksWithMissingTransactions(blocks));
+        }).then((transactions: any) => {
+            return this.accountParser.parseAccounts(transactions);
         }).then((transactions: any) => {
             return this.coinParser.parseCoins(transactions);
         }).then(() => {
