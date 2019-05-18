@@ -22,8 +22,6 @@ export class CoinParser {
 
         if (bulkCoins.length === 0) return Promise.resolve();
 
-        //return Promise.resolve(extractedCoins);
-
         return bulkCoins.execute().then((bulkResult: any) => {
             return Promise.resolve(extractedCoins);
         });
