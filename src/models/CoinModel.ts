@@ -9,6 +9,11 @@ const Schema = mongoose.Schema;
  * @type {"mongoose".Schema}
  */
 const coinSchema = new Schema({
+    _id: {
+        type: String,
+        required: true,
+        index: true
+    },
     name: {
         type: String,
         required: true,

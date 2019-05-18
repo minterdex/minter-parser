@@ -3,7 +3,7 @@ import { Coin } from "../models/CoinModel";
 
 export class CoinParser {
     public parseCoins(transactions: any) {
-        if (transactions.length === 0) return Promise.resolve();
+        if (!transactions || transactions.length === 0) return Promise.resolve();
 
         const extractedCoins = [];
 
@@ -22,6 +22,8 @@ export class CoinParser {
 
         if (bulkCoins.length === 0) return Promise.resolve();
 
+        //return Promise.resolve(extractedCoins);
+
         return bulkCoins.execute().then((bulkResult: any) => {
             return Promise.resolve(extractedCoins);
         });
@@ -29,6 +31,7 @@ export class CoinParser {
 
     extractCoinData(coin: ICoin, tx: ITransaction) {
         return {
+            id: String(coin.symbol),
             name: String(coin.name),
             symbol: String(coin.symbol),
             owner: String(tx.from),
